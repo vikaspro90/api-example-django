@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-11">
+          <p>Welcome <strong>{{ username }}</strong></p>
+        </div>
+        <div class="col-md-1">
+          <a href="/logout">
+            Logout
+          </a>
+        </div>
+      </div>
+      <p>{{ heading }}</p>
+      <div class="row">
+          <ul>
+            {% for p in patients %}
+                <div class="col-md-1">
+                    <li>{{ p.first_name }} {{ p.last_name }}</li>
+                </div>
+                <div class="col-md-1">
+                    <a href="www.google.com">Send wishes</a>
+                </div>
+            {% endfor %}
+          </ul>
+      </div>
+    </div>
+  </body>
+</html>
