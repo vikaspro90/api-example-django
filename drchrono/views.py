@@ -10,12 +10,14 @@ def main(request):
 	name = request.user.get_username()
 	social = request.user.social_auth.get(provider="drchrono")
 	token = social.extra_data['access_token']
-	# bornToday = [p["first_name"]+" "+p["last_name"] for p in helper.getPatientsWithDOBToday(token)]
 	heading = "Here are all your patients born on this day."
 	bornToday = helper.getPatientsWithDOBToday(token)
 	if len(bornToday)==0:
 		heading = "None of your patients were born on this day."
 	return render_to_response("main.html", {"username": name, "patients": bornToday, "heading": heading})
+
+def sendEmail(request):
+	pass
 
 def logout(request):
 	auth_logout(request=request)

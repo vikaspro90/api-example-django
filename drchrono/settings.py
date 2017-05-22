@@ -20,14 +20,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = os.environ["DJANGO_DRCHRONO_APP_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-SOCIAL_AUTH_DRCHRONO_KEY = ''
-SOCIAL_AUTH_DRCHRONO_SECRET = ''
+SOCIAL_AUTH_DRCHRONO_KEY = os.environ["DRCHRONO_CLIENT_ID"]
+SOCIAL_AUTH_DRCHRONO_SECRET = os.environ["DRCHRONO_SECRET"]
 #SOCIAL_AUTH_DRCHRONO_SCOPE
 LOGIN_REDIRECT_URL = '/main'
 
@@ -100,6 +100,7 @@ DATABASES = {
 LANGUAGE_CODE = 'en-us'
 
 # uses system time
+# Timezone by default is UTC
 TIME_ZONE = None
 
 USE_I18N = True
@@ -114,12 +115,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-#   Email settings
-# EMAIL_USE_TLS = True
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_HOST_PASSWORD =
-# EMAIL_HOST_USER =
-# EMAIL_PORT = 587
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# Email settings using a gmail server and account.
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = os.environ["GMAIL_USER"]
+EMAIL_HOST_PASSWORD = os.environ["GMAIL_PASSWORD"]
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
