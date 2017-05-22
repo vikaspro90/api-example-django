@@ -14,7 +14,7 @@ def main(request):
 	heading = "Here are all your patients born on this day."
 	bornToday = helper.getPatientsWithDOBToday(token)
 	if len(bornToday)==0:
-		heading = "None of your patients was born on this day."
+		heading = "None of your patients were born on this day."
 	return render_to_response("main.html", {"username": name, "patients": bornToday, "heading": heading})
 
 def logout(request):
