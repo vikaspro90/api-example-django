@@ -15,18 +15,25 @@
           </a>
         </div>
       </div>
+      <!-- Disabling the Django template parsing to prevent conflicts with AngularJS parsing-->
       {% verbatim %}
       <p>{{ heading }}</p>
           <ul ng-repeat="p in patients">
             <div class="row">
                 <div class="col-md-2">
-                    <li>{{ p.first_name }} {{ p.last_name }}</li>
+                    <li ng-attr-id="{{ p.id }}">{{ p.first_name }} {{ p.last_name }}</li>
                 </div>
                 <div class="col-md-2">
-                    <a href="http://www.google.com">Send wishes</a>
+                    <button ng-hide="p.id==selectedId" ng-click="sendWishes(p)">Send wishes</button>
+                    <textarea ng-show="p.id==selectedId" id="emailMessage{{ p.id }}" ng-model="emailMessage" form="messageForm{{ p.id }}"></textarea>
+                    <form ng-show="p.id==selectedId" id="messageForm{{ p.id }}" ng-submit="sendEmail(p.email)">
+                        <input ng-hide="noEmail" type="submit" value="Send">
+                        <button type="button" ng-click="cancelSend()">Cancel</button>
+                    </form>
                 </div>
             </div>
           </ul>
+      <!-- Enabling the Django template parsing-->
       {% endverbatim %}
       </div>
   </body>

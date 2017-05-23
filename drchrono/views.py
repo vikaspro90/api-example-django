@@ -32,7 +32,11 @@ def updatePatientList(request):
 
 @login_required(login_url="/")
 def sendEmail(request):
-	pass
+	print "In send email"
+	toList = json.loads(request.body)["toList"]
+	message = json.loads(request.body)["message"]
+	helper.sendBirthdayEmail(toList, message)
+	return HttpResponse(200)
 
 def logout(request):
 	auth_logout(request=request)

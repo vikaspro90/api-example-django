@@ -20,5 +20,5 @@ def getPatientsWithDOBToday(token, today):
 			for patient in patients if patient["date_of_birth"]!=None and patient["date_of_birth"][5:]==today[5:10]
 	       ]
 
-def sendBirthdayEmail(toList, message, subject="Yay.. Happy Birthday!!"):
-	send_mail(subject, message, settings.EMAIL_HOST_USER, toList, fail_silently=False)
+def sendBirthdayEmail(toList, message, subject="!!Happy Birthday!!"):
+	send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, toList, fail_silently=False)
