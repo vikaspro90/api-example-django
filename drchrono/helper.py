@@ -10,9 +10,8 @@ def getAllPatients(token):
 	# A list of all the patients
 	return json.loads(response.content)["results"]
 
-def getPatientsWithDOBToday(token):
+def getPatientsWithDOBToday(token, today):
 	patients = getAllPatients(token)
-	today = str(timezone.now())
 	return [{"id": patient["id"],
 			 "first_name": patient["first_name"],
 			 "last_name": patient["last_name"],
