@@ -3,11 +3,12 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
-  <body ng-controller="mainController" ng-init="updateClientDate()">
+  <body ng-controller="mainController" ng-init="handShake()">
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-11">
-          <p>Welcome <span id="docName"><strong>{{ docName }}</strong></span></p>
+          <!-- <p>Welcome <span id="docName"><strong>{{ docName }}</strong></span></p> -->
+            <p>Welcome <strong>{{ docName }}</strong></p>
         </div>
         <div class="col-md-1">
           <a href="/logout">
@@ -17,21 +18,40 @@
       </div>
       <!-- Disabling the Django template parsing to prevent conflicts with AngularJS parsing-->
       {% verbatim %}
-      <p>{{ heading }}</p>
+          <div class="row">
+            <p class="col-md-3">{{ heading }}</p>
+            <button class="col-md-1" type="button" ng-show="patients.length>0" ng-click="showSendAll()">Send to all</button>
+          </div>
+          <div class="row" ng-show="sendAllFlag">
+            <textarea ng-show="sendAllFlag" id="sendAllTextId" ng-model="messages.sendAllMessage" form="sendAllForm"></textarea>
+            <textarea ng-show="sendAllFlag" id="sendAllPreviewId" readonly="true">Hello [patient name]&#010;&#010;{{ messages.sendAllMessage }}</textarea>
+            <form ng-show="sendAllFlag" id="sendAllForm" ng-submit="sendAll()">
+                <input type="submit" value="Send">
+                <button type="button" ng-click="cancelSendAll()">Cancel</button>
+                <p class="col-md-3">{{ sendAllInfo }}</p>
+            </form>
+          </div>
           <ul ng-repeat="p in patients">
             <div class="row">
                 <div class="col-md-2">
                     <li ng-attr-id="{{ p.id }}">{{ p.first_name }} {{ p.last_name }}</li>
                 </div>
                 <div class="col-md-2">
-                    <button ng-hide="p.id==selectedId" ng-click="showDetails(p)">Select</button>
-                    <button ng-hide="p.id==selectedId" ng-click="sendWishes(p)">Quick send</button>
-                    <textarea ng-show="p.id==selectedId" id="emailMessage{{ p.id }}" ng-model="emailMessage" form="messageForm{{ p.id }}"></textarea>
-                    <form ng-show="p.id==selectedId" id="messageForm{{ p.id }}" ng-submit="sendEmail(p.email)">
+                    <button ng-hide="p.id==sendingId || p.id==selectedId" ng-click="showDetails(p)">View</button>
+                    <button ng-hide="p.id==sendingId || p.id==selectedId" ng-click="sendWishes(p)">Quick send</button>
+                    <textarea ng-show="p.id==sendingId" id="emailMessage{{ p.id }}" ng-model="messages.emailMessage" form="messageForm{{ p.id }}"></textarea>
+                    <form ng-show="p.id==sendingId" id="messageForm{{ p.id }}" ng-submit="sendEmail(p.email)">
                         <input ng-hide="noEmail" type="submit" value="Send">
                         <button type="button" ng-click="cancelSend()">Cancel</button>
+                        <p class="col-md-3">{{ sendOneInfo }}</p>
                     </form>
                 </div>
+            </div>
+            <div class="row" ng-show="p.id==selectedId">
+            </div>
+            <div class="row" ng-show="p.id==selectedId">
+                <img src="{{ currPatient.patient_photo }}" alt="No image" height="200">
+                <button type="button" ng-click="cancelDetails()">Cancel</button>
             </div>
           </ul>
       <!-- Enabling the Django template parsing-->

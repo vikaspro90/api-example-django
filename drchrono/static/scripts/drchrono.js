@@ -4,18 +4,21 @@ var drchrono = angular .module("drchronoApp",[])
                             // Get the local date in ISO format
                             var offset = (new Date()).getTimezoneOffset() * 60000;
                             var localISODate = (new Date(Date.now()-offset)).toISOString().slice(0, 10);
+                            console.log(localISODate);
                             $scope.heading = "Please wait...";
                             $scope.patients=[];
-                            $scope.emailMessage = "";
-                            $scope.updateClientDate = function() {
-                                $scope.docName = document.getElementById("docName").innerText;
+                            $scope.messages={"emailMessage":"", "sendAllMessage":""};
+                            $scope.handShake = function() {
                                 console.log($scope.docName);
+                                console.log(localISODate);
                                 $http({
                                     method: "POST",
-                                    url: appURL + "updateClientDate/",
+                                    url: appURL + "handShake/",
                                     data: {"clientDate": localISODate}
                                 })
                                 .then(function(response){
+                                    $scope.docName = response.data.docName;
+                                    console.log(response);
                                     updatePatientList();
                                 },
                                 function(response){
@@ -33,7 +36,7 @@ var drchrono = angular .module("drchronoApp",[])
                                     // Success
                                     $scope.patients=response.data.patients;
                                     if($scope.patients.length==0){
-                                        $scope.heading="None of your 14patients were born on this day.";
+                                        $scope.heading="None of your patients were born on this day.";
                                     }
                                     else{
                                         $scope.heading="Below are your patients that were born on this day.";
@@ -47,43 +50,120 @@ var drchrono = angular .module("drchronoApp",[])
                             }
 
                             $scope.showDetails = function(p){
+                                clearSendMessages();
+                                $scope.sendAllFlag=false;
+                                $scope.sendingId="";
+                                $http({
+                                    method: "GET",
+                                    url: appURL + "getPatientDetails/",
+                                    params: {"fname": p.first_name,
+                                    "lname": p.last_name,
+                                    "dob": p.date_of_birth}
+                                }).then(function(response){
+                                    console.log(response.data.patient);
+                                    $scope.selectedId = p.id;
+                                    $scope.currPatient = response.data.patient;
+                                },
+                                function(response){
 
+                                });
+                            };
+
+                            $scope.cancelDetails = function(){
+                                $scope.selectedId = "";
                             };
 
                             $scope.sendWishes = function(p){
-                                $scope.selectedId = p.id;
+                                clearSendMessages();
+                                $scope.selectedId = "";
+                                $scope.sendAllFlag=false;
+                                $scope.sendingId = p.id;
                                 if(p.email.length==0) {
                                     var textarea = document.getElementById("emailMessage"+p.id);
                                     textarea.setAttribute("readonly", "true");
-                                    $scope.emailMessage = "Oops.. There is no emailId on file for "+p.first_name+" "+p.last_name+".";
+                                    $scope.messages.emailMessage = "Oops.. There is no emailId on file for "+p.first_name+" "+p.last_name+".";
                                     $scope.noEmail = true;
                                     return;
                                 }
                                 $scope.noEmail = false;
-                                console.log($scope.selectedId +" "+ p.id);
-                                $scope.emailMessage = "Dear "+p.first_name+" "+p.last_name+", \n\nMany many happy returns of the day.\n\n..from your caring doctor.";
-                                console.log($scope.emailMessage);
+                                console.log($scope.sendingId +" "+ p.id);
+                                $scope.messages.emailMessage = "Hello "+p.first_name+" "+p.last_name+", " +
+                                    "\n\nWish you a wonderful birthday and great health.\n\n..from Dr."+$scope.docName;
+                                console.log($scope.messages.emailMessage);
                             };
 
-                            $scope.sendEmail = function(email){
-                                var emails = [email];
+                            $scope.cancelSend = function(){
+                                clearSendMessages();
+                                $scope.sendingId="";
+                            };
+
+                            $scope.showSendAll = function(){
+                                $scope.sendAllFlag=true;
+                                $scope.selectedId="";
+                                $scope.sendingId="";
+                                clearSendMessages();
+                                $scope.messages.sendAllMessage = "Wish you a wonderful birthday and great health.\n\n..from Dr."+$scope.docName;
+                            };
+
+                            $scope.cancelSendAll = function(){
+                                clearSendMessages();
+                                $scope.sendAllFlag=false;
+                            };
+
+                            $scope.sendAll = function(){
+                                $scope.sendAllInfo = "Sending..";
+                                var emails = [];
+                                var names = [];
+                                var noEmail = [];
+                                console.log($scope.patients);
+                                $scope.patients.forEach(function(p){
+                                    if (p.email == "") {
+                                        noEmail.push(p.first_name + " " + p.last_name);
+                                    }
+                                    else {
+                                        emails.push(p.email);
+                                        names.push(p.first_name+" "+p.last_name);
+                                    }
+                                });
+                                $scope.messages.emailMessage = $scope.messages.sendAllMessage;
+                                $scope.sendEmail(emails, names);
+                            };
+
+                            $scope.sendEmail = function(email, names){
+                                var mode="multiple";
+                                if(typeof email === "string") {
+                                    var email = [email];
+                                    mode="single";
+                                }
                                 $http({
                                     method: "POST",
                                     url: appURL + "sendEmail/",
-                                    data: {"toList": emails, "message": $scope.emailMessage}
+                                    data: {"toList": email, "message": $scope.messages.emailMessage, "mode": mode, "names":names}
                                 })
                                 .then(function(response){
                                     // Success
+                                    if(mode=="multiple"){
+                                        var numSent = email.length;
+                                        var numNoEmail = $scope.patients.length-numSent;
+                                        var noEmailMsg = "No email found for "+numNoEmail+" patient(s).";
+                                        if(numNoEmail==0) noEmailMsg="";
+                                        $scope.sendAllInfo = "Email sent to "+numSent+" patient(s). "+noEmailMsg;
+                                    }
+                                    else{
+                                        $scope.sendOneInfo = "Email sent.";
+                                    }
                                     console.log("Sent email");
                                 },
                                 function(response){
                                     // Could not reach server
-                                    $scope.heading="Something went wrong while sending email(s).";
+                                    $scope.sendOneInfo="Something went wrong while sending email.";
+                                    $scope.sendAllInfo="Something went wrong while sending email(s).";
                                 });
                             };
 
-                            $scope.cancelSend = function(){
-                                $scope.selectedId="";
+                            function clearSendMessages(){
+                                $scope.sendOneInfo="";
+                                $scope.sendAllInfo="";
                             }
                         })
 
