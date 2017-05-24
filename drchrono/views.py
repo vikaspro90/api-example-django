@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from django.http import HttpResponse
 from models import SessionWithDate, Session
-import json
+import json, requests
 import helper
 
 # Create your views here.
@@ -11,8 +11,17 @@ import helper
 # Main page for authenticated users
 @login_required(login_url="/")
 def main(request):
-	name = request.user.get_username()
-	return render_to_response("main.html", {"username": name})
+	username = request.user.get_username()
+	social = request.user.social_auth.get(provider="drchrono")
+	token = social.extra_data['access_token']
+	uid = social.uid
+	# print social.uid
+	docName = helper.getCurrUserDocName(token, uid)
+	request.user.first_name = docName[0]
+	request.user.last_name = docName[1]
+	data = social.uid
+	# return render_to_response("main.html", {"name": docName})
+	return render_to_response("main.html", {"docName": " ".join(docName), "data": data})
 
 @login_required(login_url="/")
 def updateClientDate(request):

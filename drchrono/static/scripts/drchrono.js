@@ -8,6 +8,8 @@ var drchrono = angular .module("drchronoApp",[])
                             $scope.patients=[];
                             $scope.emailMessage = "";
                             $scope.updateClientDate = function() {
+                                $scope.docName = document.getElementById("docName").innerText;
+                                console.log($scope.docName);
                                 $http({
                                     method: "POST",
                                     url: appURL + "updateClientDate/",
@@ -31,7 +33,7 @@ var drchrono = angular .module("drchronoApp",[])
                                     // Success
                                     $scope.patients=response.data.patients;
                                     if($scope.patients.length==0){
-                                        $scope.heading="None of your patients were born on this day.";
+                                        $scope.heading="None of your 14patients were born on this day.";
                                     }
                                     else{
                                         $scope.heading="Below are your patients that were born on this day.";
@@ -44,7 +46,11 @@ var drchrono = angular .module("drchronoApp",[])
                                 });
                             }
 
-                            $scope.sendWishes = function sendWishes(p){
+                            $scope.showDetails = function(p){
+
+                            };
+
+                            $scope.sendWishes = function(p){
                                 $scope.selectedId = p.id;
                                 if(p.email.length==0) {
                                     var textarea = document.getElementById("emailMessage"+p.id);

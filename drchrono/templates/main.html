@@ -7,7 +7,7 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-11">
-          <p>Welcome <strong>{{ username }}</strong></p>
+          <p>Welcome <span id="docName"><strong>{{ docName }}</strong></span></p>
         </div>
         <div class="col-md-1">
           <a href="/logout">
@@ -24,7 +24,8 @@
                     <li ng-attr-id="{{ p.id }}">{{ p.first_name }} {{ p.last_name }}</li>
                 </div>
                 <div class="col-md-2">
-                    <button ng-hide="p.id==selectedId" ng-click="sendWishes(p)">Send wishes</button>
+                    <button ng-hide="p.id==selectedId" ng-click="showDetails(p)">Select</button>
+                    <button ng-hide="p.id==selectedId" ng-click="sendWishes(p)">Quick send</button>
                     <textarea ng-show="p.id==selectedId" id="emailMessage{{ p.id }}" ng-model="emailMessage" form="messageForm{{ p.id }}"></textarea>
                     <form ng-show="p.id==selectedId" id="messageForm{{ p.id }}" ng-submit="sendEmail(p.email)">
                         <input ng-hide="noEmail" type="submit" value="Send">
@@ -35,6 +36,9 @@
           </ul>
       <!-- Enabling the Django template parsing-->
       {% endverbatim %}
+      </div>
+      <div>
+          {{ data }}
       </div>
   </body>
 </html>
