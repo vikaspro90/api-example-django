@@ -22,15 +22,14 @@ def main(request):
 		request.user.save()
 	else:
 		docName = [request.user.first_name, request.user.last_name]
-	data = helper.getPatientDetails("Vikas", "Nahi Hai", "1990-05-24")
-	# return render_to_response("main.html", {"name": docName})
-	return render_to_response("main.html", {"docName": " ".join(docName), "data": data})
+	return render_to_response("main.html", {"docName": " ".join(docName)})
 
 @login_required(login_url="/")
 def handShake(request):
 	print "In handShake."
 	# Associating the client date with the current session
-	currSession = Session.objects.filter(session_key=request.session.session_key)
+	currSession = SessionWithDate.objects.filter(sess_id=request.session.session_key)
+	print request.session.session_key, currSession
 	if len(currSession)==0:
 		SessionWithDate.objects.create(sess=Session.objects.filter(session_key=request.session.session_key)[0], date=json.loads(request.body)["clientDate"])
 	else:
@@ -41,7 +40,7 @@ def handShake(request):
 @login_required(login_url="/")
 def updatePatientList(request):
 	print "In updatePatientList."
-	clientDate = SessionWithDate.objects.filter(sess=request.session.session_key)[0].date
+	clientDate = SessionWithDate.objects.filter(sess_id=request.session.session_key)[0].date
 	patients = helper.getPatientsWithDOBToday(clientDate)
 	return HttpResponse(json.dumps({"patients": patients}), 200)
 

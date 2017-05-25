@@ -1,67 +1,138 @@
+<!DOCTYPE html>
 <html ng-app="drchronoApp">
-  <head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-  </head>
-  <body ng-controller="mainController" ng-init="handShake()">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-11">
-          <!-- <p>Welcome <span id="docName"><strong>{{ docName }}</strong></span></p> -->
-            <p>Welcome <strong>{{ docName }}</strong></p>
-        </div>
-        <div class="col-md-1">
-          <a href="/logout">
-            Logout
-          </a>
-        </div>
-      </div>
-      <!-- Disabling the Django template parsing to prevent conflicts with AngularJS parsing-->
-      {% verbatim %}
-          <div class="row">
-            <p class="col-md-3">{{ heading }}</p>
-            <button class="col-md-1" type="button" ng-show="patients.length>0" ng-click="showSendAll()">Send to all</button>
-          </div>
-          <div class="row" ng-show="sendAllFlag">
-            <textarea ng-show="sendAllFlag" id="sendAllTextId" ng-model="messages.sendAllMessage" form="sendAllForm"></textarea>
-            <textarea ng-show="sendAllFlag" id="sendAllPreviewId" readonly="true">Hello [patient name]&#010;&#010;{{ messages.sendAllMessage }}</textarea>
-            <form ng-show="sendAllFlag" id="sendAllForm" ng-submit="sendAll()">
-                <input type="submit" value="Send">
-                <button type="button" ng-click="cancelSendAll()">Cancel</button>
-                <p class="col-md-3">{{ sendAllInfo }}</p>
-            </form>
-          </div>
-          <ul ng-repeat="p in patients">
-            <div class="row">
-                <div class="col-md-2">
-                    <li ng-attr-id="{{ p.id }}">{{ p.first_name }} {{ p.last_name }}</li>
-                </div>
-                <div class="col-md-2">
-                    <button ng-hide="p.id==sendingId || p.id==selectedId" ng-click="showDetails(p)">View</button>
-                    <button ng-hide="p.id==sendingId || p.id==selectedId" ng-click="sendWishes(p)">Quick send</button>
-                    <textarea ng-show="p.id==sendingId" id="emailMessage{{ p.id }}" ng-model="messages.emailMessage" form="messageForm{{ p.id }}"></textarea>
-                    <form ng-show="p.id==sendingId" id="messageForm{{ p.id }}" ng-submit="sendEmail(p.email)">
-                        <input ng-hide="noEmail" type="submit" value="Send">
-                        <button type="button" ng-click="cancelSend()">Cancel</button>
-                        <p class="col-md-3">{{ sendOneInfo }}</p>
-                    </form>
-                </div>
-            </div>
-            <div class="row" ng-show="p.id==selectedId">
-            </div>
-            <div class="row" ng-show="p.id==selectedId">
-                <img src="{{ currPatient.patient_photo }}" alt="No image" height="200">
-                <button type="button" ng-click="cancelDetails()">Cancel</button>
-            </div>
-          </ul>
-      <!-- Enabling the Django template parsing-->
-      {% endverbatim %}
-      </div>
-      <div>
-          {{ data }}
-      </div>
-  </body>
-</html>
 {% load static %}
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'stylesheets/drchrono.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body ng-controller="mainController" ng-init="handShake()">
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <p class="navbar-brand">drchrono</p>
+            <p class="navbar-text">Wish your patient</p>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a><span class="glyphicon glyphicon-user"></span> {{ docName }}</a></li>
+            <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="container-fluid">
+    <!-- Disabling the Django template parsing to prevent conflicts with AngularJS parsing-->
+    {% verbatim %}
+        <div class="row">
+            <div class="col-md-offset-1 col-md-10 panel panel-default">
+                <div class="panel-heading">
+                    <p class="panel-title text-center">Today's birthdays</p>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <p class="">{{ heading }}</p>
+                    </div>
+                    <div class="row">
+                        <button class="btn btn-primary col-md-offset-5 col-md-2" type="button" ng-show="patients.length>0 && !sendAllFlag" ng-click="showSendAll()">Send
+                            wishes to all
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="panel col-md-offset-3 col-md-6" ng-show="sendAllFlag">
+                            <div class="panel-heading">
+                                <p class="panel-title text-center">Compose your message below and click send</p>
+                            </div>
+                            <div class="row">
+                                <textarea rows="5" class="form-control" ng-show="sendAllFlag" id="sendAllTextId" ng-model="messages.sendAllMessage"
+                                          form="sendAllForm"></textarea>
+                            </div>
+                            <div class="row"><p class="text-info">Preview:</p></div>
+                            <div class="row">
+                                <textarea rows="5" class="form-control"  ng-show="sendAllFlag" id="sendAllPreviewId" readonly="true">Hello [patient name]&#010;&#010;{{ messages.sendAllMessage }}</textarea>
+                            </div>
+
+                            <div class="row">
+                                <form id="sendAllForm" ng-submit="sendAll()">
+                                    <input class="btn btn-success emailSend" type="submit" value="Send">
+                                    <button class="btn btn-warning emailCancel" type="button" ng-click="cancelSendAll()">Cancel</button>
+                                </form>
+                            </div>
+                            <div class="panel-footer"><p>{{ sendAllInfo }}</p></div>
+                        </div>
+                    </div>
+                    <br>
+                    <ul class="list-group" ng-repeat="p in patients">
+                        <div class="row listItem">
+                            <div class="col-md-2">
+                                <li class="list-unstyled" ng-attr-id="{{ p.id }}"><span class="text-primary">{{ p.first_name }} {{ p.last_name }}</span></li>
+                            </div>
+                            <div class="col-md-offset-7 col-md-3">
+                                <button class="btn btn-info" ng-hide="p.id==sendingId || p.id==selectedId" ng-click="showDetails(p)">View
+                                </button>
+                                <button class="btn btn-primary" ng-hide="p.id==sendingId || p.id==selectedId" ng-click="quickSend(p)">Quick send
+                                </button>
+                                <div class="row" ng-show="p.id==sendingId">
+                                    <textarea rows="5" class="form-control" id="emailMessage{{ p.id }}"
+                                              ng-model="messages.emailMessage" form="messageForm{{ p.id }}"></textarea>
+                                </div>
+                                <div class="row" ng-show="p.id==sendingId">
+                                    <form id="messageForm{{ p.id }}" ng-submit="sendEmail(p.email)">
+                                        <input class="btn btn-success emailSend" ng-hide="noEmailFlag" type="submit" value="Send">
+                                        <button class="btn btn-warning emailCancel" type="button" ng-click="cancelSend()">Cancel</button>
+                                    </form>
+                                </div>
+                                <div class="row" ng-show="p.id==sendingId">
+                                    <p>{{ sendOneInfo }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel" ng-show="p.id==selectedId">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <img class="img-rounded" src="{{ currPatient.patient_photo }}" alt="No image" height="200px">
+                                </div>
+                                <div class="col-md-offset-1 col-md-7">
+                                    <br>
+                                    <div class="row">
+                                        <p class="col-md-2">Gender</p>
+                                        <p class="col-md-offset-2">: {{ currPatient.gender }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="col-md-2">Address</p>
+                                        <p class="col-md-offset-2">: {{ currPatient.address }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="col-md-2">Last updated</p>
+                                        <p class="col-md-offset-2">: {{ currPatient.updated_at }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="col-md-2">Chart Id</p>
+                                        <p class="col-md-offset-2">: {{ currPatient.chart_id }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <textarea rows="5" class="form-control" id="emailMessageDet{{ p.id }}" ng-model="messages.emailMessage"
+                                          form="messageFormDet{{ p.id }}"></textarea>
+                            </div>
+                            <div class="row">
+                                <form id="messageFormDet{{ p.id }}" ng-submit="sendEmail(p.email)">
+                                    <input class="btn btn-success emailSend" ng-hide="noEmailFlag" type="submit" value="Send">
+                                    <button class="btn btn-warning emailCancel" type="button" ng-click="cancelDetails()">Cancel</button>
+                                </form>
+                            </div>
+                            <div class="row">
+                                <p class="panel-footer">{{ sendOneInfo }}</p>
+                            </div>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    <!-- Enabling the Django template parsing-->
+    {% endverbatim %}
+</div>
+</body>
+</html>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
 <script type="text/javascript" src="{% static 'scripts/drchrono.js' %}"></script>

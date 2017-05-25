@@ -1,0 +1,12 @@
+.navbar-brand{
+    font-size: 5.5em !important;
+}
+.navbar-text{
+    font-size: 1.5em !important;
+}
+.listItem{
+    border-bottom: 1px dotted darkgray;
+}
+body{
+    background-color: darkgray;
+}

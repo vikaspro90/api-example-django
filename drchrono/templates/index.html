@@ -1,8 +1,28 @@
 <!DOCTYPE html>
 <html>
-  <body>
-    <a href="{% url 'social:begin' 'drchrono' %}">
-      drchrono OAuth
-    </a>
-  </body>
+{% load static %}
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'stylesheets/drchrono.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <p class="navbar-brand">drchrono</p>
+                <p class="navbar-text">Wish your patient</p>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{% url 'social:begin' 'drchrono' %}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <p class="text-center">Find out who among your patients are celebrating a birthday today.</p>
+        </div>
+        <p class="text-info text-center">Login using your drchrono account to continue(click login in the top right corner)</p>
+    </div>
+</body>
 </html>

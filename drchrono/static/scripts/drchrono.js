@@ -5,6 +5,7 @@ var drchrono = angular .module("drchronoApp",[])
                             var offset = (new Date()).getTimezoneOffset() * 60000;
                             var localISODate = (new Date(Date.now()-offset)).toISOString().slice(0, 10);
                             console.log(localISODate);
+                            var buttonStatus="true";
                             $scope.heading = "Please wait...";
                             $scope.patients=[];
                             $scope.messages={"emailMessage":"", "sendAllMessage":""};
@@ -50,7 +51,8 @@ var drchrono = angular .module("drchronoApp",[])
                             }
 
                             $scope.showDetails = function(p){
-                                clearSendMessages();
+                                $scope.viewDetailsInfo = "Please wait while we retrieve the details..."
+                                clearInfoMessages();
                                 $scope.sendAllFlag=false;
                                 $scope.sendingId="";
                                 $http({
@@ -60,12 +62,14 @@ var drchrono = angular .module("drchronoApp",[])
                                     "lname": p.last_name,
                                     "dob": p.date_of_birth}
                                 }).then(function(response){
-                                    console.log(response.data.patient);
+                                    $scope.viewDetailsInfo = "";
+                                    // console.log(response.data.patient);
                                     $scope.selectedId = p.id;
                                     $scope.currPatient = response.data.patient;
+                                    $scope.buildEmail(p);
                                 },
                                 function(response){
-
+                                    $scope.viewDetailsInfo = "Sorry. Failed to retrieve the details.";
                                 });
                             };
 
@@ -73,27 +77,31 @@ var drchrono = angular .module("drchronoApp",[])
                                 $scope.selectedId = "";
                             };
 
-                            $scope.sendWishes = function(p){
-                                clearSendMessages();
+                            $scope.quickSend = function(p){
+                                clearInfoMessages();
                                 $scope.selectedId = "";
                                 $scope.sendAllFlag=false;
                                 $scope.sendingId = p.id;
+                                $scope.buildEmail(p);
+                            };
+
+                            $scope.buildEmail = function(p){
                                 if(p.email.length==0) {
                                     var textarea = document.getElementById("emailMessage"+p.id);
                                     textarea.setAttribute("readonly", "true");
+                                    textarea = document.getElementById("emailMessageDet"+p.id);
+                                    textarea.setAttribute("readonly", "true");
                                     $scope.messages.emailMessage = "Oops.. There is no emailId on file for "+p.first_name+" "+p.last_name+".";
-                                    $scope.noEmail = true;
+                                    $scope.noEmailFlag = true;
                                     return;
                                 }
-                                $scope.noEmail = false;
-                                console.log($scope.sendingId +" "+ p.id);
+                                $scope.noEmailFlag = false;
                                 $scope.messages.emailMessage = "Hello "+p.first_name+" "+p.last_name+", " +
                                     "\n\nWish you a wonderful birthday and great health.\n\n..from Dr."+$scope.docName;
-                                console.log($scope.messages.emailMessage);
                             };
 
                             $scope.cancelSend = function(){
-                                clearSendMessages();
+                                clearInfoMessages();
                                 $scope.sendingId="";
                             };
 
@@ -101,12 +109,12 @@ var drchrono = angular .module("drchronoApp",[])
                                 $scope.sendAllFlag=true;
                                 $scope.selectedId="";
                                 $scope.sendingId="";
-                                clearSendMessages();
+                                clearInfoMessages();
                                 $scope.messages.sendAllMessage = "Wish you a wonderful birthday and great health.\n\n..from Dr."+$scope.docName;
                             };
 
                             $scope.cancelSendAll = function(){
-                                clearSendMessages();
+                                clearInfoMessages();
                                 $scope.sendAllFlag=false;
                             };
 
@@ -130,6 +138,8 @@ var drchrono = angular .module("drchronoApp",[])
                             };
 
                             $scope.sendEmail = function(email, names){
+                                $scope.sendOneInfo = "Sending...";
+                                disableButtons();
                                 var mode="multiple";
                                 if(typeof email === "string") {
                                     var email = [email];
@@ -152,18 +162,39 @@ var drchrono = angular .module("drchronoApp",[])
                                     else{
                                         $scope.sendOneInfo = "Email sent.";
                                     }
-                                    console.log("Sent email");
+                                    enableButtons();
+                                    // console.log("Sent email");
                                 },
                                 function(response){
                                     // Could not reach server
                                     $scope.sendOneInfo="Something went wrong while sending email.";
                                     $scope.sendAllInfo="Something went wrong while sending email(s).";
+                                    enableButtons();
                                 });
                             };
 
-                            function clearSendMessages(){
+                            function clearInfoMessages(){
                                 $scope.sendOneInfo="";
                                 $scope.sendAllInfo="";
+                                $scope.viewDetailsInfo="";
+                            }
+
+                            function enableButtons(){
+                                var sends = document.getElementsByClassName("emailSend");
+                                var cancels = document.getElementsByClassName("emailCancel");
+                                for(var i=0; i<cancels.length; i++){
+                                    sends[i].removeAttribute("disabled");
+                                    cancels[i].removeAttribute("disabled");
+                                }
+                            }
+
+                            function disableButtons(){
+                                var sends = document.getElementsByClassName("emailSend");
+                                var cancels = document.getElementsByClassName("emailCancel");
+                                for(var i=0; i<cancels.length; i++){
+                                    sends[i].setAttribute("disabled", "");
+                                    cancels[i].setAttribute("disabled", "");
+                                }
                             }
                         })
 
