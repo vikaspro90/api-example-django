@@ -4,14 +4,14 @@ var drchrono = angular .module("drchronoApp",[])
                             // Get the local date in ISO format
                             var offset = (new Date()).getTimezoneOffset() * 60000;
                             var localISODate = (new Date(Date.now()-offset)).toISOString().slice(0, 10);
-                            console.log(localISODate);
-                            var buttonStatus="true";
                             $scope.heading = "Please wait...";
                             $scope.patients=[];
                             $scope.messages={"emailMessage":"", "sendAllMessage":""};
                             $scope.handShake = function() {
-                                console.log($scope.docName);
-                                console.log(localISODate);
+                                /*
+                                An initial handshake between the client and the server.
+                                Sends the client date to the server and fetches current the doctor name.
+                                 */
                                 $http({
                                     method: "POST",
                                     url: appURL + "handShake/",
@@ -19,16 +19,19 @@ var drchrono = angular .module("drchronoApp",[])
                                 })
                                 .then(function(response){
                                     $scope.docName = response.data.docName;
-                                    console.log(response);
                                     updatePatientList();
                                 },
                                 function(response){
                                     // Could not reach server
-                                    $scope.heading="Something went wrong while contacting the server.";
+                                    $scope.heading="Something went wrong while contacting the server. Please try after some time.";
                                 });
                             };
 
                             function updatePatientList() {
+                                /*
+                                Gets the patients that were born on this day.
+                                This is a callback called from handShake.
+                                 */
                                 $http({
                                     method: "GET",
                                     url: appURL + "updatePatientList/"
@@ -42,7 +45,6 @@ var drchrono = angular .module("drchronoApp",[])
                                     else{
                                         $scope.heading="Below are your patients that were born on this day.";
                                     }
-                                    // console.log(response)
                                 },
                                 function(response){
                                     // Could not reach server
@@ -51,6 +53,10 @@ var drchrono = angular .module("drchronoApp",[])
                             }
 
                             $scope.showDetails = function(p){
+                                /*
+                                Fetches the details of a particular patient.
+                                Uses name and dob to uniquely identify patient.
+                                 */
                                 $scope.viewDetailsInfo = "Please wait while we retrieve the details..."
                                 clearInfoMessages();
                                 $scope.sendAllFlag=false;
@@ -63,7 +69,6 @@ var drchrono = angular .module("drchronoApp",[])
                                     "dob": p.date_of_birth}
                                 }).then(function(response){
                                     $scope.viewDetailsInfo = "";
-                                    // console.log(response.data.patient);
                                     $scope.selectedId = p.id;
                                     $scope.currPatient = response.data.patient;
                                     $scope.buildEmail(p);
@@ -74,10 +79,17 @@ var drchrono = angular .module("drchronoApp",[])
                             };
 
                             $scope.cancelDetails = function(){
+                                /*
+                                Hides the patients details panel.
+                                 */
                                 $scope.selectedId = "";
                             };
 
                             $scope.quickSend = function(p){
+                                /*
+                                Displays a text box and send option to
+                                quickly send a message to a patient.
+                                 */
                                 clearInfoMessages();
                                 $scope.selectedId = "";
                                 $scope.sendAllFlag=false;
@@ -86,6 +98,11 @@ var drchrono = angular .module("drchronoApp",[])
                             };
 
                             $scope.buildEmail = function(p){
+                                /*
+                                Builds an email to be sent to a particular patient.
+                                If a patient does not have an email address on file, this
+                                disables the text box and displays an appropriate message.
+                                 */
                                 if(p.email.length==0) {
                                     var textarea = document.getElementById("emailMessage"+p.id);
                                     textarea.setAttribute("readonly", "true");
@@ -101,11 +118,18 @@ var drchrono = angular .module("drchronoApp",[])
                             };
 
                             $scope.cancelSend = function(){
+                                /*
+                                Hides the quick send panel.
+                                 */
                                 clearInfoMessages();
                                 $scope.sendingId="";
                             };
 
                             $scope.showSendAll = function(){
+                                /*
+                                Displays the text box and send option to send a
+                                message to all those who have birthdays today.
+                                 */
                                 $scope.sendAllFlag=true;
                                 $scope.selectedId="";
                                 $scope.sendingId="";
@@ -114,16 +138,21 @@ var drchrono = angular .module("drchronoApp",[])
                             };
 
                             $scope.cancelSendAll = function(){
+                                /*
+                                Hides the send all panel.
+                                 */
                                 clearInfoMessages();
                                 $scope.sendAllFlag=false;
                             };
 
                             $scope.sendAll = function(){
+                                /*
+                                Builds the list of email addresses and calls the sendEmail() function to send emails.
+                                 */
                                 $scope.sendAllInfo = "Sending..";
                                 var emails = [];
                                 var names = [];
                                 var noEmail = [];
-                                console.log($scope.patients);
                                 $scope.patients.forEach(function(p){
                                     if (p.email == "") {
                                         noEmail.push(p.first_name + " " + p.last_name);
@@ -138,6 +167,11 @@ var drchrono = angular .module("drchronoApp",[])
                             };
 
                             $scope.sendEmail = function(email, names){
+                                /*
+                                Sends a single email or multiple emails based on the
+                                arguments received and configures the message displayed
+                                to the user accordingly.
+                                 */
                                 $scope.sendOneInfo = "Sending...";
                                 disableButtons();
                                 var mode="multiple";
@@ -163,7 +197,6 @@ var drchrono = angular .module("drchronoApp",[])
                                         $scope.sendOneInfo = "Email sent.";
                                     }
                                     enableButtons();
-                                    // console.log("Sent email");
                                 },
                                 function(response){
                                     // Could not reach server
@@ -174,12 +207,20 @@ var drchrono = angular .module("drchronoApp",[])
                             };
 
                             function clearInfoMessages(){
+                                /*
+                                Reset the messages displayed to the user.
+                                 */
                                 $scope.sendOneInfo="";
                                 $scope.sendAllInfo="";
                                 $scope.viewDetailsInfo="";
                             }
 
                             function enableButtons(){
+                                /*
+                                Enables the send and cancel buttons below the text area.
+                                Called when a response is received from the server after clicking
+                                on send.
+                                 */
                                 var sends = document.getElementsByClassName("emailSend");
                                 var cancels = document.getElementsByClassName("emailCancel");
                                 for(var i=0; i<cancels.length; i++){
@@ -189,6 +230,10 @@ var drchrono = angular .module("drchronoApp",[])
                             }
 
                             function disableButtons(){
+                                /*
+                                Disables the send and cancel buttons below the text area.
+                                Called when send is clicked.
+                                 */
                                 var sends = document.getElementsByClassName("emailSend");
                                 var cancels = document.getElementsByClassName("emailCancel");
                                 for(var i=0; i<cancels.length; i++){
@@ -199,7 +244,9 @@ var drchrono = angular .module("drchronoApp",[])
                         })
 
 					.config(function ($httpProvider) {
+                        // Needed for enabling cookies
 						$httpProvider.defaults.withCredentials = true;
+                        // Needed for proper handling of the django csrftoken
                         $httpProvider.defaults.xsrfCookieName = 'csrftoken';
                         $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 					});

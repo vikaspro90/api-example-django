@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ["DJANGO_DRCHRONO_APP_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 SOCIAL_AUTH_DRCHRONO_KEY = os.environ["DRCHRONO_CLIENT_ID"]
 SOCIAL_AUTH_DRCHRONO_SECRET = os.environ["DRCHRONO_SECRET"]
 #SOCIAL_AUTH_DRCHRONO_SCOPE
@@ -126,4 +126,3 @@ EMAIL_HOST_USER = os.environ["GMAIL_USER"]
 EMAIL_HOST_PASSWORD = os.environ["GMAIL_PASSWORD"]
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = "vikaspro90@drchrono.com"
-
